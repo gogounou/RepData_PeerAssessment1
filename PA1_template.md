@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -11,7 +6,8 @@ output:
 First, we'll download the activity file and load the data set. We'll then format the date field to allow us to analyze the data more easily. [NB - For this assignment the data has already been provided in the forked github repo. In the interest of thoroughness, we'll check for the existence of the file and provide an alternate download location in the event that it is not found.]
 
 
-```{r dataload}
+
+```r
 ## Check if zip file is already downloaded. If not download to working directory.
 zipdl <- "activity.zip"
 if (!file.exists(zipdl)) {
@@ -32,7 +28,8 @@ activity$date <- as.Date(activity$date)
 Now that we've got some data, it's time to work with it. We'll first calculate the total number of steps per day and create a histogram to display that information. We'll then calculate and display the mean and median of those values.
 
 
-```{r stepsPerDay}
+
+```r
 ## Total Steps Per Day
 totalStepsDay <- aggregate(activity$steps, by=list(activity$date), FUN=sum, na.rm=T)
 
@@ -55,7 +52,9 @@ abline(v=meanStepsDay, col="red", lwd=3)
 abline(v=medianStepsDay, col="dark blue", lwd=3)
 ```
 
-And so, as calculated above, the mean number of steps taken per day is <span style="color:red">`r format(meanStepsDay, scientific=FALSE)`</span> and the median number of steps taken per day is <span style="color:darkblue">`r medianStepsDay`</span> (included on the plot above as vertical lines of the corresponding colors).
+![](PA1_template_files/figure-html/stepsPerDay-1.png) 
+
+And so, as calculated above, the mean number of steps taken per day is <span style="color:red">9354.23</span> and the median number of steps taken per day is <span style="color:darkblue">10395</span> (included on the plot above as vertical lines of the corresponding colors).
 
 
 ## What is the average daily activity pattern?
@@ -63,7 +62,8 @@ And so, as calculated above, the mean number of steps taken per day is <span sty
 We'll now look at the average number of steps taken over each interval and display that data in a plot.
 
 
-```{r dailyActivity}
+
+```r
 ## Average steps per interval
 meanStepsInterval <- aggregate(activity$steps, by=list(activity$interval), FUN=mean, na.rm=T)
 
@@ -83,7 +83,9 @@ maxInterval <- meanStepsInterval[which.max(meanStepsInterval[,2]),1]
 abline(v=maxInterval, col="red", lwd=1)
 ```
 
-The interval with the maximum number of steps taken is <span style="color:red">`r maxInterval`</span>. It's displayed in the plot above as a red line.
+![](PA1_template_files/figure-html/dailyActivity-1.png) 
+
+The interval with the maximum number of steps taken is <span style="color:red">835</span>. It's displayed in the plot above as a red line.
 
 
 ## Imputing missing values
@@ -91,14 +93,16 @@ The interval with the maximum number of steps taken is <span style="color:red">`
 Now about those missing values in the dataset...
 
 
-```{r countMissingValues}
+
+```r
 missing <- sum(is.na(activity))
 ```
 
-It seems that there are <span style="color:red">`r missing`</span> records containing 'NA' values in our dataset. Let's replace those with the mean value for the interval corresponding to each 'NA'. We can then create a new histogram and recalculate the mean and median for the new, cleaned up, dataset.
+It seems that there are <span style="color:red">2304</span> records containing 'NA' values in our dataset. Let's replace those with the mean value for the interval corresponding to each 'NA'. We can then create a new histogram and recalculate the mean and median for the new, cleaned up, dataset.
 
 
-```{r replaceMissingValues}
+
+```r
 ## Create our new data set, adding the mean steps matched by inetrval
 activityComplete <- cbind(activity, meanStepsInterval[,2])
 names(activityComplete)[4] <- c("meanSteps")
@@ -125,14 +129,17 @@ hist(
 abline(v=noNA_meanStepsDay, col="red", lwd=3)
 ```
 
-After replacing the NA values with the means for the corresponding interval, the mean number of steps taken per day is <span style="color:red">`r format(noNA_meanStepsDay, scientific=FALSE)`</span> and the median number of steps taken per day is <span style="color:red">`r format(noNA_medianStepsDay, scientific=FALSE)`</span> (both included in the plot above as a red line. NB - In this case the median represents as a decimal because in replacing NA values with the interval mean, we essentially added data stating that some intervals contained partial steps/decimal values). By removing the NA values in the data set and replacing them with the average values for the corresponding interval, we skew the data toward the center. In the histogram above, one can see that the poisson ditribution of the data remains, but the peak of the centermost values in the distribution is much more sever than in the first representation (which simply ignored the NAs). Also evident is that the extreme values - particularly the 0 results - are eclipsed by the severe bent toward the mean. This suggests to me that by replacing NA values with the mean data we have potentially obscured outlying data points.
+![](PA1_template_files/figure-html/replaceMissingValues-1.png) 
+
+After replacing the NA values with the means for the corresponding interval, the mean number of steps taken per day is <span style="color:red">10766.19</span> and the median number of steps taken per day is <span style="color:red">10766.19</span> (both included in the plot above as a red line. NB - In this case the median represents as a decimal because in replacing NA values with the interval mean, we essentially added data stating that some intervals contained partial steps/decimal values). By removing the NA values in the data set and replacing them with the average values for the corresponding interval, we skew the data toward the center. In the histogram above, one can see that the poisson ditribution of the data remains, but the peak of the centermost values in the distribution is much more sever than in the first representation (which simply ignored the NAs). Also evident is that the extreme values - particularly the 0 results - are eclipsed by the severe bent toward the mean. This suggests to me that by replacing NA values with the mean data we have potentially obscured outlying data points.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 We can now split our dataset to see if we notice any changes in activity from weekdays to weekends.
 
 
-```{r weekdayWeekend}
+
+```r
 ## Create columns in the data set to identify weekday/weekend factor
 activityComplete$day <- weekdays(activityComplete$date)
 activityComplete$dayFactor <- as.factor(ifelse(activityComplete$day %in% c("Saturday","Sunday"), "Weekend", "Weekday"))
@@ -153,7 +160,8 @@ maxWkndInterval <- weekendStepsInterval[which.max(weekendStepsInterval[,2]),1]
 And we can display the results on a pair of plots for a visual comparison:
 
 
-```{r weekdayWeekendPlot, fig.width=8, fig.height=10}
+
+```r
 ## Note to peer reviewer: this was the only plot that required me to set dimensions in order to display it legibly. I'd be curious if it represents properly to you. Including the OS and graphics device used ot view would be helpful information. Thank you! 
 
 ## Create plot
@@ -177,8 +185,9 @@ plot( x=weekendStepsInterval[,1],
       col="blue")
 ## Add abline showing max to plot
 abline(v=maxWkndInterval, col="red", lwd=1)
-
 ```
 
-The results of this dual plot are interesting, if not surprising. In both data sets we see little activity during intervals 0-500, suggesting stationary - likely sleeping - participants. On weekdays, we see a peak at <span style="color:red">`r maxWkdyInterval`</span>, exactly the same maximum as our overall (undivided) set. One could imagine this activity being the result of starting the day, perhaps morning exercise coupled with a morning commute. We then see a more static baseline of activity, as to suggest the stationary behavior one would display at work or school. We see a similar early peak on the weekends, at <span style="color:red">`r maxWkndInterval`</span>, though afterward we see a more varied distribution of activity scattered throughout the day. One could surmise that this is because the average person doesn't adhere to as rigid a schedule on weekends, and therefore more and varied activity is possible/likely. In both data sets we see a decrease in activity in the higher intervals (>2000), though the decrease begins a bit later on weekends than it does on weekdays. This is also in line with expected behavior of most individuals on weekend days vs. weekdays.
+![](PA1_template_files/figure-html/weekdayWeekendPlot-1.png) 
+
+The results of this dual plot are interesting, if not surprising. In both data sets we see little activity during intervals 0-500, suggesting stationary - likely sleeping - participants. On weekdays, we see a peak at <span style="color:red">835</span>, exactly the same maximum as our overall (undivided) set. One could imagine this activity being the result of starting the day, perhaps morning exercise coupled with a morning commute. We then see a more static baseline of activity, as to suggest the stationary behavior one would display at work or school. We see a similar early peak on the weekends, at <span style="color:red">915</span>, though afterward we see a more varied distribution of activity scattered throughout the day. One could surmise that this is because the average person doesn't adhere to as rigid a schedule on weekends, and therefore more and varied activity is possible/likely. In both data sets we see a decrease in activity in the higher intervals (>2000), though the decrease begins a bit later on weekends than it does on weekdays. This is also in line with expected behavior of most individuals on weekend days vs. weekdays.
 
